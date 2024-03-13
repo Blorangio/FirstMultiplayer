@@ -1,6 +1,9 @@
 let socket = io();
 let ID = "";
 
+let cameraX = 0;
+let cameraY = 0;
+
 let players = [];
 
 function decode(str) {
@@ -18,8 +21,18 @@ socket.on("init", function(data) {
 let canvas = document.getElementById("mainCanvas");
 let paint = canvas.getContext("2d");
 
+let size = 160;
+
 function clearCanvas() {
     paint.clearRect(0, 0, 1000, 562);
+    paint.fillStyle = "black";
+    for(let i =-2;i<1000/size+2;i++) {
+        for(let j=-1;j<562/size+2;j++) {
+            if((i+j)%2==0) {
+                paint.fillRect(i*size+cameraX%(size*2), (j-1)*size+cameraY%(size*2), size, size);
+            }
+        }
+    }
 }
 
 let up = false;
@@ -50,9 +63,6 @@ document.body.onkeyup = function(e, event) {
         left = false;
     }
 }
-
-let cameraX = 0;
-let cameraY = 0;
 
 socket.on("playerData", function(data) {
     players = decode(data.msg);
