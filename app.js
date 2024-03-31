@@ -179,6 +179,43 @@ class Map {
     }
 }
 
+let dungeon = [];
+
+/*
+Possible Rooms:
+    Entrance
+    Scrap Room
+        Variants (1, 2, 3) *Same thing but just a different look*
+    Hallway
+    Bend
+    Three Way
+    Four Way
+
+Possible Addons:
+    Vent
+    Fire Escape
+    Scrap
+    Key
+    Locked Door
+    Door
+
+Possible Scrap: *Name  |  Value Range  |  Spawn Chance*
+    Large Bolt    | 20-32  | 2/6
+    Cash Register | 80-160 | 1/12
+    V-type Engine | 20-56  | 1/12
+    Candy         | 6-36   | 2/6
+    Present       | 12-28  | 1/12
+    Large Axel    | 36-56  | 1/12
+ */
+
+function loadDungeon() {
+
+}
+
+function encodeDungeon() {
+    
+}
+
 let maps = [new Map(new Point(200, 200), [new Point(400, 300), new Point(300, 400)])];
 let map = new Map(new Point(0, 0), []);
 map = maps[MAP];
@@ -199,6 +236,10 @@ io.sockets.on('connection', function(socket) {
         msg:socket.id,
         map:MAP+''
     });
+
+    socket.emit("dungeonData", {
+        data:encodeDungeon()
+    })
 
     socket.on("data", function(data) {
         socket.UP = data.UP;

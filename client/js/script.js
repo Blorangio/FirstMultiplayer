@@ -95,6 +95,7 @@ let up = false;
 let down = false;
 let left = false;
 let right = false;
+let collect = false;
 
 document.body.onkeydown = function(e, event) {
     if(e.keyCode == 68 || e.keyCode == 39) {
@@ -105,6 +106,8 @@ document.body.onkeydown = function(e, event) {
         down = true;
     } else if(e.keyCode == 65 || e.keyCode == 37) {
         left = true;
+    } else if(e.keyCode == 69 || e.keyCode == 96) {
+        collect = true;
     }
 }
 
@@ -117,13 +120,14 @@ document.body.onkeyup = function(e, event) {
         down = false;
     } else if(e.keyCode == 65 || e.keyCode == 37) {
         left = false;
+    } else if(e.keyCode == 69 || e.keyCode == 96) {
+        collect = false;
     }
 }
 
 let distance = 200;
 
 function close() {
-    console.log(parseInt(players[parseInt(ID)][1])+25);
     if(map.mainEntrance.distanceFrom(new Point(parseInt(players[parseInt(ID)][1])+25+10, parseInt(players[parseInt(ID)][2])-50)) < distance) {
         return [true, -1];
     } else {
@@ -149,8 +153,17 @@ function dropDown(message) {
         temp = 90;
     }
     paint.font = temp+"px Arial";
-    console.log(paint.font.replace("px", ""));
     paint.fillText(message, 500-paint.measureText(message).width/2, 100+parseInt(paint.font.replace("px", "").split(" ")[0])/4);
+}
+
+let dungeon = [];
+
+socket.on("dungeonData", function(data) {
+    
+});
+
+function enterDungeon(entrance) {
+
 }
 
 socket.on("playerData", function(data) {
@@ -178,6 +191,8 @@ socket.on("playerData", function(data) {
     let isClose = close();
     if(isClose[0]) {
         dropDown("Press E to Enter");
-        console.log(isClose[1]);
+        if(collect) {
+            enterDungeon(isClose[1]);
+        }
     }    
 });
