@@ -37,7 +37,7 @@ class Point {
         return this.x * point.x + this.y * point.y;
     }
     distanceFrom(point) {
-        return Math.sqrt(Math.pow(this.x-point.x, 2)+Math.pow(this.x-point.x, 2));
+        return Math.sqrt(Math.pow(this.x-point.x, 2)+Math.pow(this.y-point.y, 2));
     }
 }
 
@@ -77,7 +77,7 @@ function clearCanvas() {
     paint.fillStyle = "black";
     //Default background
     for(let i =-2;i<1000/size+2;i++) {
-        for(let j=-1;j<562/size+2;j++) {
+        for(let j=-1;j<562/size+4;j++) {
             if((i+j)%2==0) {
                 paint.fillRect(i*size+cameraX%(size*2), (j-1)*size+cameraY%(size*2), size, size);
             }
@@ -120,14 +120,15 @@ document.body.onkeyup = function(e, event) {
     }
 }
 
-let distance = 100;
+let distance = 200;
 
 function close() {
-    if(map.mainEntrance.distanceFrom(new Point(players[parseInt(ID)][1]+25, players[parseInt(ID)][2]+25)) < 100) {
+    console.log(parseInt(players[parseInt(ID)][1])+25);
+    if(map.mainEntrance.distanceFrom(new Point(parseInt(players[parseInt(ID)][1])+25+10, parseInt(players[parseInt(ID)][2])-50)) < distance) {
         return [true, -1];
     } else {
         for(let i in map.fireEscapes) {
-            if(map.fireEscapes[i].distanceFrom(new Point(players[parseInt(ID)][1]+25, players[parseInt(ID)][2]+25)) < 100) {
+            if(map.fireEscapes[i].distanceFrom(new Point(parseInt(players[parseInt(ID)][1])+25-10, parseInt(players[parseInt(ID)][2])-50)) < distance) {
                 return [true, i];
             }
         }
@@ -177,5 +178,6 @@ socket.on("playerData", function(data) {
     let isClose = close();
     if(isClose[0]) {
         dropDown("Press E to Enter");
+        console.log(isClose[1]);
     }    
 });
