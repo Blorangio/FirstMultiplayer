@@ -170,6 +170,19 @@ function genRect(x, y, width, height) {
     return new Shape(tempPoints);
 }
 
+let MAP = 0;
+
+class Map {
+    constructor(mainEntrance, fireEscapes) {
+        this.mainEntrance = mainEntrance;
+        this.fireEscapes = fireEscapes;
+    }
+}
+
+let maps = [new Map(new Point(200, 200), [new Point(400, 300), new Point(300, 400)])];
+let map = new Map(new Point(0, 0), []);
+map = maps[MAP];
+
 let io = require('socket.io')(serv,{});
 io.sockets.on('connection', function(socket) {
     socket.id = socketList.length;
@@ -183,7 +196,8 @@ io.sockets.on('connection', function(socket) {
     socketList[socket.id] = socket;
 
     socket.emit("init", {
-        msg:socket.id
+        msg:socket.id,
+        map:MAP+''
     });
 
     socket.on("data", function(data) {
@@ -249,6 +263,21 @@ function gameLoop() {
                     socketList[j].x += collisionUpdate.depth * collisionUpdate.normal.x/2;
                     socketList[j].y += collisionUpdate.depth * collisionUpdate.normal.y/2;
                 }
+            }
+        }
+    }
+
+    for(let i in socketList) {
+        let collisionUpdate = polygonCollision(genRect(map.mainEntrance.x+25, map.mainEntrance.y+25, 20, 100), genRect(socketList[i].x, socketList[i].y, 50, 50));
+        if(collisionUpdate.isColliding) {
+            socketList[i].x += collisionUpdate.depth * collisionUpdate.normal.x;
+            socketList[i].y += collisionUpdate.depth * collisionUpdate.normal.y;
+        }
+        for(let j in map.fireEscapes) {
+            collisionUpdate = polygonCollision(genRect(map.fireEscapes[j].x+25, map.fireEscapes[j].y+25, 20, 100), genRect(socketList[i].x, socketList[i].y, 50, 50));
+            if(collisionUpdate.isColliding) {
+                socketList[i].x += collisionUpdate.depth * collisionUpdate.normal.x;
+                socketList[i].y += collisionUpdate.depth * collisionUpdate.normal.y;
             }
         }
     }

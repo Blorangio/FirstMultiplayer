@@ -6,6 +6,51 @@ let cameraY = 0;
 
 let players = [];
 
+class Point {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+    add(point) {
+        this.x+=point.x;
+        this.y+=point.y;
+    }
+    divide(num) {
+        this.x /= num;
+        this.y /= num;
+    }
+    multiply(num) {
+        this.x *= num;
+        this.y *= num;
+    }
+    subtract(point) {
+        this.x -= point.x;
+        this.y -= point.y;
+    }
+    length() {
+        return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2));
+    }
+    normalize() {
+        this.divide(this.length());
+    }
+    dotProduct(point) {
+        return this.x * point.x + this.y * point.y;
+    }
+    distanceFrom(point) {
+        return Math.sqrt(Math.pow(this.x-point.x, 2)+Math.pow(this.x-point.x, 2));
+    }
+}
+
+class Map {
+    constructor(mainEntrance, fireEscapes) {
+        this.mainEntrance = mainEntrance;
+        this.fireEscapes = fireEscapes;
+    }
+}
+
+let maps = [new Map(new Point(200, 200), [new Point(400, 300), new Point(300, 400)])];
+let map = new Map(new Point(0, 0), []);
+
 function decode(str) {
     let arr = str.split(",");
     for(let i in arr) {
@@ -16,6 +61,7 @@ function decode(str) {
 
 socket.on("init", function(data) {
     ID = data.msg;
+    map = maps[parseInt(data.map)];
 });
 
 let canvas = document.getElementById("mainCanvas");
@@ -23,15 +69,25 @@ let paint = canvas.getContext("2d");
 
 let size = 160;
 
+let doorWidth = 20;
+let doorHeight = 100;
+
 function clearCanvas() {
     paint.clearRect(0, 0, 1000, 562);
     paint.fillStyle = "black";
+    //Default background
     for(let i =-2;i<1000/size+2;i++) {
         for(let j=-1;j<562/size+2;j++) {
             if((i+j)%2==0) {
                 paint.fillRect(i*size+cameraX%(size*2), (j-1)*size+cameraY%(size*2), size, size);
             }
         }
+    }
+    //render the doors from the map
+    paint.fillStyle = "red";
+    paint.fillRect(cameraX + map.mainEntrance.x, cameraY + map.mainEntrance.y, doorWidth, doorHeight);
+    for(let i in map.fireEscapes) {
+        paint.fillRect(cameraX + map.fireEscapes[i].x, cameraY + map.fireEscapes[i].y, doorWidth, doorHeight);
     }
 }
 
@@ -64,6 +120,38 @@ document.body.onkeyup = function(e, event) {
     }
 }
 
+let distance = 100;
+
+function close() {
+    if(map.mainEntrance.distanceFrom(new Point(players[parseInt(ID)][1]+25, players[parseInt(ID)][2]+25)) < 100) {
+        return [true, -1];
+    } else {
+        for(let i in map.fireEscapes) {
+            if(map.fireEscapes[i].distanceFrom(new Point(players[parseInt(ID)][1]+25, players[parseInt(ID)][2]+25)) < 100) {
+                return [true, i];
+            }
+        }
+    }
+    return [false, -1];
+}
+
+function dropDown(message) {
+    paint.fillStyle = "white";
+    paint.fillRect(400, 50, 200, 100);
+    paint.fillStyle = "black";
+    paint.lineWidth = 4;
+    paint.strokeRect(400, 50, 200, 100);
+    paint.lineWidth = 1;
+    paint.font = "1px Arial";
+    let temp = 180/paint.measureText(message).width;
+    if(temp>90) {
+        temp = 90;
+    }
+    paint.font = temp+"px Arial";
+    console.log(paint.font.replace("px", ""));
+    paint.fillText(message, 500-paint.measureText(message).width/2, 100+parseInt(paint.font.replace("px", "").split(" ")[0])/4);
+}
+
 socket.on("playerData", function(data) {
     players = decode(data.msg);
     for(let i in players) {
@@ -73,14 +161,21 @@ socket.on("playerData", function(data) {
         }
     }
     clearCanvas();
-    paint.fillStyle = "orange";
-    for(let i in players) {
-        paint.fillRect(parseInt(players[i][1])-25+cameraX, parseInt(players[i][2])-25+cameraY, 50, 50);
-    }
+
     socket.emit("data", {
         UP:up,
         DOWN:down,
         LEFT:left,
         RIGHT:right
     });
+
+    paint.fillStyle = "orange";
+    for(let i in players) {
+        paint.fillRect(parseInt(players[i][1])-25+cameraX, parseInt(players[i][2])-25+cameraY, 50, 50);
+    }
+
+    let isClose = close();
+    if(isClose[0]) {
+        dropDown("Press E to Enter");
+    }    
 });
