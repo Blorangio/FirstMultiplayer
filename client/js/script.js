@@ -67,6 +67,9 @@ socket.on("init", function(data) {
 let canvas = document.getElementById("mainCanvas");
 let paint = canvas.getContext("2d");
 
+let opacityCanvas = document.getElementById("opacityCanvas");
+let shadow = opacityCanvas.getContext("2d");
+
 let size = 160;
 
 let doorWidth = 20;
@@ -89,6 +92,18 @@ function clearCanvas() {
     for(let i in map.fireEscapes) {
         paint.fillRect(cameraX + map.fireEscapes[i].x, cameraY + map.fireEscapes[i].y, doorWidth, doorHeight);
     }
+    //addLight(paint, 1, 'rgba(0,0,0,' + (1 - .1) + ')', 250, 270, 0, 250, 270, 100);
+}
+
+function addLight(ctx, intsy, amb, xStart, yStart, rStart, xEnd, yEnd, rEnd, xOff, yOff) {
+    xOff = xOff || 0;
+    yOff = yOff || 0;
+
+    var g = ctx.createRadialGradient(xStart, yStart, rStart, xEnd, yEnd, rEnd);
+    g.addColorStop(1, 'rgba(0,0,0,' + (1 - intsy) + ')');
+    g.addColorStop(0, amb);
+    ctx.fillStyle = g;
+    ctx.fillRect(xStart - rEnd + xOff, yStart - rEnd + yOff, xEnd + rEnd, yEnd + rEnd);
 }
 
 let up = false;

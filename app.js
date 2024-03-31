@@ -183,13 +183,14 @@ let dungeon = [];
 
 /*
 Possible Rooms:
-    Entrance
+    Entrance   0
     Scrap Room
         Variants (1, 2, 3) *Same thing but just a different look*
-    Hallway
-    Bend
-    Three Way
-    Four Way
+    Hallway 4
+    Bend 5
+    Three Way 6
+    Four Way 7
+    Dead End 8
 
 Possible Addons:
     Vent
@@ -207,6 +208,17 @@ Possible Scrap: *Name  |  Value Range  |  Spawn Chance*
     Present       | 12-28  | 1/12
     Large Axel    | 36-56  | 1/12
  */
+
+class Room {
+    constructor(type, position) {
+        this.type = type;
+        this.position = position;
+    }
+    loadRoom() {
+
+        
+    }
+}
 
 function loadDungeon() {
 
