@@ -188,8 +188,21 @@ opacityCanvas.addEventListener("click", function() {
     socket.emit("click", {});
 });
 
+function decodeDungeon(str) {
+    let temp = str.split(":");
+    for(let i in temp) {
+        temp[i].split(",");
+    }
+    for(let i in temp) {
+        for(let j in temp[i]) {
+            temp[i][j] = parseInt(temp[i][j]);
+        }
+    }
+    dungeon = temp;
+}
+
 socket.on("dungeonData", function(data) {
-    
+    decodeDungeon(data.data);
 });
 
 function enterDungeon(entrance) {
