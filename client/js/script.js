@@ -65,9 +65,11 @@ socket.on("init", function(data) {
 });
 
 let canvas = document.getElementById("mainCanvas");
+canvas.style.zIndex = "0";
 let paint = canvas.getContext("2d");
 
 let opacityCanvas = document.getElementById("opacityCanvas");
+opacityCanvas.style.zIndex = "10";
 let shadow = opacityCanvas.getContext("2d");
 
 let size = 160;
@@ -92,7 +94,6 @@ function clearCanvas() {
     for(let i in map.fireEscapes) {
         paint.fillRect(cameraX + map.fireEscapes[i].x, cameraY + map.fireEscapes[i].y, doorWidth, doorHeight);
     }
-    //addLight(paint, 1, 'rgba(0,0,0,' + (1 - .1) + ')', 250, 270, 0, 250, 270, 100);
 }
 
 function addLight(ctx, intsy, amb, xStart, yStart, rStart, xEnd, yEnd, rEnd, xOff, yOff) {
@@ -103,7 +104,8 @@ function addLight(ctx, intsy, amb, xStart, yStart, rStart, xEnd, yEnd, rEnd, xOf
     g.addColorStop(1, 'rgba(0,0,0,' + (1 - intsy) + ')');
     g.addColorStop(0, amb);
     ctx.fillStyle = g;
-    ctx.fillRect(xStart - rEnd + xOff, yStart - rEnd + yOff, xEnd + rEnd, yEnd + rEnd);
+    //ctx.fillRect(xStart - rEnd + xOff, yStart - rEnd + yOff, xEnd + rEnd, yEnd + rEnd);
+    ctx.fillRect(0, 0, 1000, 562);
 }
 
 let up = false;
@@ -156,22 +158,35 @@ function close() {
 }
 
 function dropDown(message) {
-    paint.fillStyle = "white";
-    paint.fillRect(400, 50, 200, 100);
-    paint.fillStyle = "black";
-    paint.lineWidth = 4;
-    paint.strokeRect(400, 50, 200, 100);
-    paint.lineWidth = 1;
-    paint.font = "1px Arial";
-    let temp = 180/paint.measureText(message).width;
+    shadow.fillStyle = "white";
+    shadow.fillRect(400, 50, 200, 100);
+    shadow.fillStyle = "black";
+    shadow.lineWidth = 4;
+    shadow.strokeRect(400, 50, 200, 100);
+    shadow.lineWidth = 1;
+    shadow.font = "1px Arial";
+    let temp = 180/shadow.measureText(message).width;
     if(temp>90) {
         temp = 90;
     }
-    paint.font = temp+"px Arial";
-    paint.fillText(message, 500-paint.measureText(message).width/2, 100+parseInt(paint.font.replace("px", "").split(" ")[0])/4);
+    shadow.font = temp+"px Arial";
+    shadow.fillText(message, 500-shadow.measureText(message).width/2, 100+parseInt(shadow.font.replace("px", "").split(" ")[0])/4);
 }
 
 let dungeon = [];
+
+let mouse = new Point(0, 0);
+let flashlight = false;
+
+opacityCanvas.addEventListener("mousemove", function(e) {
+    mouse.x = e.x - opacityCanvas.getBoundingClientRect().left;
+    mouse.y = e.y - opacityCanvas.getBoundingClientRect().top;
+});
+
+opacityCanvas.addEventListener("click", function() {
+    flashlight = !flashlight;
+    socket.emit("click", {});
+});
 
 socket.on("dungeonData", function(data) {
     
@@ -198,9 +213,33 @@ socket.on("playerData", function(data) {
         RIGHT:right
     });
 
+    shadow.fillStyle = "black";
+    shadow.fillRect(0, 0, 1000, 562);
+    shadow.fillStyle = 'rgba(0,0,0,' + (1 - .1) + ')';
+    shadow.globalCompositeOperation = 'xor';
+    addLight(shadow, 1, 'rgba(0,0,0,' + (1 - .5) + ')', parseInt(players[parseInt(ID)][1])+cameraX,  parseInt(players[parseInt(ID)][2])+cameraY, 0, parseInt(players[parseInt(ID)][1])+cameraX,  parseInt(players[parseInt(ID)][2])+cameraY, 70);
+    let tempMouse = new Point(mouse.x, mouse.y);
+    mouse.subtract(new Point(parseInt(players[parseInt(ID)][1])+cameraX, parseInt(players[parseInt(ID)][2])+cameraY));
+    mouse.normalize();
+    if(flashlight) {
+        socket.emit("flashlight", {
+            x:mouse.x,
+            y:mouse.y
+        });
+    }
+    shadow.globalCompositeOperation = 'source-over';
+    mouse.x = tempMouse.x;
+    mouse.y = tempMouse.y;
+
     paint.fillStyle = "orange";
     for(let i in players) {
         paint.fillRect(parseInt(players[i][1])-25+cameraX, parseInt(players[i][2])-25+cameraY, 50, 50);
+        if(players[i].length>3) {
+            shadow.fillStyle = 'rgba(0,0,0,' + (1 - .1) + ')';
+            shadow.globalCompositeOperation = 'xor';
+            addLight(shadow, 1, 'rgba(0,0,0,' + (1 - .1) + ')', parseInt(players[i][1])+cameraX,  parseInt(players[i][2])+cameraY, 0, parseInt(players[i][1])+cameraX+parseFloat(players[i][3])*120,  parseInt(players[i][2])+cameraY+parseFloat(players[i][4])*120, 200);
+            shadow.globalCompositeOperation = 'source-over';
+        }
     }
 
     let isClose = close();
@@ -209,5 +248,5 @@ socket.on("playerData", function(data) {
         if(collect) {
             enterDungeon(isClose[1]);
         }
-    }    
+    }
 });

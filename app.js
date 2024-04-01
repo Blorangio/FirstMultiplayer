@@ -16,6 +16,9 @@ function encode(arr) {
     let str = "";
     for(let i in arr) {
         str += arr[i].id + ":" + arr[i].x + ":" + arr[i].y;
+        if(arr[i].isOn) {
+            str+=":" + arr[i].fx + ":" + arr[i].fy;
+        }
         if(i!=arr.length-1) {
             str+=",";
         }
@@ -182,7 +185,7 @@ class Map {
 let dungeon = [];
 
 /*
-Possible Rooms:
+Possible Rooms: *Name followed by ID*
     Entrance   0
     Scrap Room
         Variants (1, 2, 3) *Same thing but just a different look*
@@ -241,6 +244,9 @@ io.sockets.on('connection', function(socket) {
     socket.DOWN = false;
     socket.LEFT = false;
     socket.RIGHT = false;
+    socket.fx = 0;
+    socket.fy = 0;
+    socket.isOn = false;
     socket.SPEED = 3;
     socketList[socket.id] = socket;
 
@@ -258,6 +264,15 @@ io.sockets.on('connection', function(socket) {
         socket.DOWN = data.DOWN;
         socket.LEFT = data.LEFT;
         socket.RIGHT = data.RIGHT;
+    });
+
+    socket.on("flashlight", function(data) {
+        socket.fx = data.x;
+        socket.fy = data.y;
+    });
+
+    socket.on("click", function() {
+        socket.isOn = !socket.isOn;
     });
 
     console.log('socket connection');
