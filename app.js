@@ -212,23 +212,240 @@ Possible Scrap: *Name  |  Value Range  |  Spawn Chance*
     Large Axel    | 36-56  | 1/12
  */
 
+let dungeonSize = 20;
+
+let downs =  [11, 12, 13, 20, 22, 32, 41, 42, 50, 52, 61, 62, 71, 72, 73, 80, 81, 82, 83, 92];
+let ups =    [10, 11, 13, 20, 22, 30, 40, 43, 50, 52, 60, 63, 70, 71, 73, 80, 81, 82, 83, 90];
+let lefts =  [10, 13, 12, 21, 23, 33, 43, 42, 51, 53, 63, 62, 70, 72, 73, 80, 81, 82, 83, 93];
+let rights = [10, 11, 12, 21, 23, 31, 40, 41, 51, 53, 60, 61, 70, 71, 72, 80, 81, 82, 83, 91];
+
 class Room {
     constructor(type, position) {
         this.type = type;
         this.position = position;
     }
     loadRoom() {
-
         
     }
 }
 
-function loadDungeon() {
-
+function remove(arr, id) {
+    let temp = [];
+    for(let i in arr) {
+        if(i!=id) {
+            temp.push(arr[i]);
+        }
+    }
+    return temp;
 }
 
+function any(arr, item) {
+    for(let i in arr) {
+        if(arr[i]==item) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function getDirectionsForSquare(type) {
+    let rtnVal = [];
+    rtnVal.push(any(ups, type));
+    rtnVal.push(any(rights, type));
+    rtnVal.push(any(downs, type));
+    rtnVal.push(any(lefts, type));
+    return rtnVal;
+}
+
+function removeDuplicates(arr) {
+    let rtnVal = [];
+    for(let i in arr) {
+        if(!any(rtnVal, arr[i])) {
+            rtnVal.push(arr[i]);
+        }
+    }
+    return rtnVal;
+}
+
+function checkOpenPaths(x, y) {
+    //Flood fill from the room that you are trying to add to see if it can reach the unfinished squares or if it completes the full grid
+    let q = [dungeon[y][x]];
+    for(let i = 0;i<q.length;i++) {
+        let c = q[i];
+        if(c!=undefined) {
+            let paths = getDirectionsForSquare(c.type);
+            if(paths[0]) {
+                q.push(dungeon[c.position.x-1][c.position.y]);
+            }
+            if(paths[1]) {
+                if(c.position.y+1>=dungeon[c.position.x].length) {
+                    return false;
+                } else {
+                    q.push(dungeon[c.position.x][c.position.y+1]);
+                }
+            }
+            if(paths[2]) {
+                if(c.position.x+1>=dungeon.length) {
+                    return false;
+                } else {
+                    q.push(dungeon[c.position.x+1][c.position.y]);
+                }
+            }
+            if(paths[3]) {
+                q.push(dungeon[c.position.x][c.position.y-1]);
+            }
+            q = removeDuplicates(q);
+        }
+    }
+    if(q.length==dungeonSize*dungeonSize) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+function intersect(arr1, arr2) {
+    let rtnVal = [];
+    for(let i in arr1) {
+        if(any(arr2, arr1[i])) {
+            rtnVal.push(arr1[i]);
+        }
+    }
+    return rtnVal;
+}
+
+function subtract(arr1, arr2) {
+    let rtnVal = [];
+    for(let i in arr1) {
+        if(!any(arr2, arr1[i])) {
+            rtnVal.push(arr1[i]);
+        }
+    }
+    return rtnVal;
+}
+
+function add(arr1, arr2) {
+    let rtnVal = [];
+    for(let i in arr2) {
+        if(!any(rtnVal, arr2[i])) {
+            rtnVal.push(arr2[i]);
+        }
+    }
+    for(let i in arr1) {
+        if(!any(rtnVal, arr1[i])) {
+            rtnVal.push(arr1[i]);
+        }
+    }
+    return rtnVal;
+}
+
+function randomType(y, x) {
+    //get adjacent rooms information
+    //0: up, 1: right, 2: down, 3: left
+    //-1 means that it is a wall, 0 means it is currently empty, 1 means that it is a passage
+    let available = [0, 0, 0, 0];
+    if(y-1<0) {
+        available[0] = -1;
+    } else {
+        if(any(downs, dungeon[y-1][x].type)) {
+            available[0] = 1;
+        } else {
+            available[0] = -1;
+        }
+    }
+    if(y+1>=dungeonSize) {
+        available[2] = -1;
+    } else {
+        if(y+1<dungeon.length) {
+            if(any(ups, dungeon[y+1][x].type)) {
+                available[2] = 1;
+            } else {
+                available[2] = -1;
+            }
+        }
+    }
+    if(x-1<0) {
+        available[3] = -1;
+    } else {
+        if(any(rights, dungeon[y][x-1].type)) {
+            available[3] = 1;
+        } else {
+            available[3] = -1;
+        }
+    }
+    if(x+1>=dungeonSize) {
+        available[1] = -1;
+    } else {
+        if(!(x+1<dungeon.length)) {
+            available[1] = -1;
+        }
+    }
+    //Get a list of all possible rooms that can generate
+    let allDirections = [ups, rights, downs, lefts];
+
+    let finalList = [];
+    finalList = add(finalList, ups);
+    finalList = add(finalList, rights);
+    finalList = add(finalList, downs);
+    finalList = add(finalList, lefts);
+    for(let i in available) {
+        if(available[i]==1) {
+            if(finalList[0]==0) {
+                finalList = allDirections[i];
+            } else {
+                finalList = intersect(finalList, allDirections[i]);
+            }
+        }
+    }
+    for(let i in available) {
+        if(available[i] == -1) {
+            finalList = subtract(finalList, allDirections[i]);
+        }
+    }
+
+    if(finalList[0]!=0) {
+        let index = parseInt(Math.random() * finalList.length);
+        let startIndex = index;
+        dungeon[y][x] = new Room(finalList[index], new Point(y, x));
+        while(checkOpenPaths(x, y)) {
+            index++;
+            if(index >= finalList.length) {
+                index = 0;
+            }
+            if(startIndex == index) {
+                break;
+            }
+            dungeon[y][x] = new Room(finalList[index], new Point(y, x));
+        }
+    } else {
+        dungeon[y][x] = new Room(-1, new Point(y, x));
+    }
+}
+
+function loadDungeon() {
+    for(let i = 0;i<dungeonSize;i++) {
+        dungeon.push([]);
+        for(let j = 0;j<dungeonSize;j++) {
+            dungeon[i].push(new Room(randomType(i, j), new Point(i, j)));
+        }
+    }
+}
+
+loadDungeon();
+
 function encodeDungeon() {
-    
+    let str = "";
+    for(let i in dungeon) {
+        for(let j in dungeon[i]) {
+            str+=dungeon[i][j]+"";
+            if(j+1==dungeon[i].length) {
+                str+=":";
+            } else {
+                str+=",";
+            }
+        }
+    }
+    return str;
 }
 
 let maps = [new Map(new Point(200, 200), [new Point(400, 300), new Point(300, 400)])];
