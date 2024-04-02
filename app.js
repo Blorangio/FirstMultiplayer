@@ -90,6 +90,17 @@ class Shape {
             this.points[i].y = y;
         }
     }
+    rotate(degrees) {
+        let rad = Math.PI / 180.0 * degrees;
+        for(let i in this.points) {
+            this.points[i].x -= this.getPosition().x;
+            this.points[i].y -= this.getPosition().y;
+            let newX = this.points[i].x * Math.cos(rad) - this.points[i].y * Math.sin(rad);
+            let newY = this.points[i].y * Math.cos(rad) + this.points[i].x * Math.sin(rad);
+            this.points[i].x = newX + position.x;
+            this.points[i].y = newY + position.y;
+        }
+    }
 }
 
 class ColliderResponse {
@@ -494,6 +505,155 @@ function encodeDungeon() {
     return str;
 }
 
+let walls = [];
+
+let roomSize = 500;
+
+function setBoundingBoxes() {
+    for(let i in dungeon) {
+        for(let j in dungeon[i]) {
+            let position = new Point(j, i);
+            let type = Math.floor(dungeon[i][j].type/10);
+            let rotation = dungeon[i][j]%10;
+            switch(type) {
+                case 1: //Entrance Room
+                    walls.push(genRect(-roomSize/2+position.y*roomSize+roomSize/2, -roomSize/2, roomSize/2-50, 20));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls[walls.length-1].rotate(90*rotation);
+                    walls.push(genRect(50+position.y*roomSize+roomSize/2, -roomSize/2, roomSize/2-50, 20));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(-roomSize/2+position.y*roomSize+roomSize/2, -roomSize/2, 20, roomSize/2-50));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(-roomSize/2+position.y*roomSize+roomSize/2, 50, 20, roomSize/2-50));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(-roomSize/2+position.y*roomSize+roomSize/2, roomSize/2, roomSize, 20));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(roomSize/2+position.y*roomSize+roomSize/2, -roomSize/2, 20, roomSize/2-50));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(roomSize/2+position.y*roomSize+roomSize/2, 50, 20, roomSize/2-50));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    break;
+                case 2: //Scrap Room 1
+                    walls.push(genRect(-roomSize/2, -roomSize/2, roomSize/2-50, 20));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(50, -roomSize/2, roomSize/2-50, 20));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(-roomSize/2, roomSize/2, roomSize/2-50, 20));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(50, roomSize/2, roomSize/2-50, 20));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(-roomSize/2, -roomSize/2, 20, roomSize));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(roomSize/2, -roomSize/2, 20, roomSize));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    break;
+                case 3: //Scrap Room 2
+                    walls.push(genRect(-roomSize/2, -roomSize/2, roomSize/2-50, 20));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(50, -roomSize/2, roomSize/2-50, 20));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(-roomSize/2, roomSize/2, roomSize, 20));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(-roomSize/2, -roomSize/2, 20, roomSize));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(roomSize/2, -roomSize/2, 20, roomSize));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    break;
+                case 4: //Scrap Room 3
+                    walls.push(genRect(-roomSize/2, -roomSize/2, roomSize/2-50, 20));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(50, -roomSize/2, roomSize/2-50, 20));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(-roomSize/2, -roomSize/2, 20, roomSize));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(-roomSize/2, roomSize/2, roomSize, 20));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(roomSize/2, -roomSize/2, 20, roomSize/2-50));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(roomSize/2, 50, 20, roomSize/2-50));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    break;
+                case 5: //Hallway
+                    walls.push(genRect(-roomSize/2, -roomSize/2, roomSize/2-50, 20));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(50, -roomSize/2, roomSize/2-50, 20));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(-roomSize/2, roomSize/2, roomSize/2-50, 20));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(50, roomSize/2, roomSize/2-50, 20));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(-roomSize/2, -roomSize/2, 20, roomSize));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(roomSize/2, -roomSize/2, 20, roomSize));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    break;
+                case 6: //Bend
+                    walls.push(genRect(-roomSize/2, -roomSize/2, roomSize/2-50, 20));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(50, -roomSize/2, roomSize/2-50, 20));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(-roomSize/2, -roomSize/2, 20, roomSize));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(-roomSize/2, roomSize/2, roomSize, 20));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(roomSize/2, -roomSize/2, 20, roomSize/2-50));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(roomSize/2, 50, 20, roomSize/2-50));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    break;
+                case 7:
+                    walls.push(genRect(-roomSize/2, -roomSize/2, roomSize/2-50, 20));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(50, -roomSize/2, roomSize/2-50, 20));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(-roomSize/2, -roomSize/2, 20, roomSize/2-50));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(-roomSize/2, 50, 20, roomSize/2-50));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(-roomSize/2, roomSize/2, roomSize, 20));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(roomSize/2, -roomSize/2, 20, roomSize/2-50));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(roomSize/2, 50, 20, roomSize/2-50));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    break;
+                case 8:
+                    walls.push(genRect(-roomSize/2, -roomSize/2, roomSize/2-50, 20));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(50, -roomSize/2, roomSize/2-50, 20));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(-roomSize/2, -roomSize/2, 20, roomSize/2-50));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(-roomSize/2, 50, 20, roomSize/2-50));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(-roomSize/2, roomSize/2, roomSize/2-50, 20));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(50, roomSize/2, roomSize/2-50, 20));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(roomSize/2, -roomSize/2, 20, roomSize/2-50));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(roomSize/2, 50, 20, roomSize/2-50));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    break;
+                case 9:
+                    walls.push(genRect(-roomSize/2, -roomSize/2, roomSize/2-50, 20));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(50, -roomSize/2, roomSize/2-50, 20));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(-roomSize/2, roomSize/2, roomSize, 20));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(-roomSize/2, -roomSize/2, 20, roomSize));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    walls.push(genRect(roomSize/2, -roomSize/2, 20, roomSize));
+                    walls[walls.length-1].translate(position.y*roomSize+roomSize/2, position.x*roomSize+roomSize/2);
+                    break;
+            }
+        }
+    }
+}
+
+setBoundingBoxes();
+
 let maps = [new Map(new Point(200, 200), [new Point(400, 300), new Point(300, 400)])];
 let map = new Map(new Point(0, 0), []);
 map = maps[MAP];
@@ -614,6 +774,14 @@ function gameLoop() {
             }
             for(let j in map.fireEscapes) {
                 collisionUpdate = polygonCollision(genRect(map.fireEscapes[j].x+25, map.fireEscapes[j].y+25, 20, 100), genRect(socketList[i].x, socketList[i].y, 50, 50));
+                if(collisionUpdate.isColliding) {
+                    socketList[i].x += collisionUpdate.depth * collisionUpdate.normal.x;
+                    socketList[i].y += collisionUpdate.depth * collisionUpdate.normal.y;
+                }
+            }
+        } else {
+            for(let j in walls) {
+                let collisionUpdate = polygonCollision(walls[j], genRect(socketList[i].x, socketList[i].y, 50, 50));
                 if(collisionUpdate.isColliding) {
                     socketList[i].x += collisionUpdate.depth * collisionUpdate.normal.x;
                     socketList[i].y += collisionUpdate.depth * collisionUpdate.normal.y;
