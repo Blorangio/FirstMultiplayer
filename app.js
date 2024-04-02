@@ -1,4 +1,5 @@
 let express = require("express");
+const { SocketAddress } = require("net");
 let app = express();
 let serv = require('http').Server(app);
 
@@ -344,6 +345,19 @@ function add(arr1, arr2) {
     return rtnVal;
 }
 
+function contains(arr1, arr2) {
+    for(let i in arr1) {
+        for(let j in arr1[i]) {
+            for(let k in arr2) {
+                if(arr1[i][j].type == arr2[k]) {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
 function randomType(y, x) {
     //get adjacent rooms information
     //0: up, 1: right, 2: down, 3: left
@@ -409,18 +423,32 @@ function randomType(y, x) {
     }
 
     if(finalList[0]!=0) {
-        let index = parseInt(Math.random() * finalList.length);
-        let startIndex = index;
-        dungeon[y][x] = new Room(finalList[index], new Point(y, x));
-        while(checkOpenPaths(x, y)) {
-            index++;
-            if(index >= finalList.length) {
-                index = 0;
+        if(!((any(finalList, 10)||any(finalList, 11)||any(finalList, 12)||any(finalList, 13))&&!contains(dungeon, [10, 11, 12, 13]))||contains(dungeon, [10, 11, 12, 13])) {
+            for(let i = 0;i<finalList.length;i++) {
+                if(finalList[i]==10||finalList[i]==11||finalList[i]==12||finalList[i]==13) {
+                    finalList = remove(finalList, i);
+                    i--;
+                }
             }
-            if(startIndex == index) {
-                break;
-            }
+            let index = parseInt(Math.random() * finalList.length);
+            let startIndex = index;
             dungeon[y][x] = new Room(finalList[index], new Point(y, x));
+            while(checkOpenPaths(x, y)) {
+                index++;
+                if(index >= finalList.length) {
+                    index = 0;
+                }
+                if(startIndex == index) {
+                    break;
+                }
+                dungeon[y][x] = new Room(finalList[index], new Point(y, x));
+            }
+        } else {
+            for(let i = 10;i<14;i++) {
+                if(any(finalList, i)) {
+                    dungeon[y][x] = new Room(i, new Point(y, x));
+                }
+            }
         }
     } else {
         dungeon[y][x] = new Room(-1, new Point(y, x));
@@ -437,6 +465,19 @@ function loadDungeon() {
 }
 
 loadDungeon();
+
+// for(let i in dungeon) {
+//     let str = "";
+//     for(let j = 0;j<dungeon[i].length-1;j++) {
+//         str+=dungeon[i][j].type + " | ";
+//     }
+//     console.log(str);
+//     str="";
+//     for(let j = 0;j<dungeon[i].length*5-5;j++) {
+//         str+="-"
+//     }
+//     console.log(str);
+// }
 
 function encodeDungeon() {
     let str = "";
@@ -500,6 +541,8 @@ io.sockets.on('connection', function(socket) {
 
     socket.on("inDungeon", function() {
         socket.inDungeon = true;
+        socket.x = 0;
+        socket.y = 0;
     });
 
     console.log('socket connection');

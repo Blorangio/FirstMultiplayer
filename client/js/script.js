@@ -209,8 +209,10 @@ socket.on("dungeonData", function(data) {
 
 function loadRoom(position) {
     let type = Math.floor(dungeon[position.x][position.y]/10);
+    let rotation = dungeon[position.x][position.y]%10;
     switch(type) {
         case 1:
+            
             break;
         case 2:
             break;
