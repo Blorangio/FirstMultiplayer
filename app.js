@@ -482,9 +482,9 @@ loadDungeon();
 function encodeDungeon() {
     let str = "";
     for(let i in dungeon) {
-        for(let j in dungeon[i]) {
-            str+=dungeon[i][j]+"";
-            if(j+1==dungeon[i].length) {
+        for(let j = 0;j<dungeon[i].length-1;j++) {
+            str+=dungeon[i][j].type+"";
+            if(j+1==dungeon[i].length-1) {
                 str+=":";
             } else {
                 str+=",";

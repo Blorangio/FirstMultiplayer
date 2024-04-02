@@ -95,6 +95,12 @@ function clearCanvas() {
         for(let i in map.fireEscapes) {
             paint.fillRect(cameraX + map.fireEscapes[i].x, cameraY + map.fireEscapes[i].y, doorWidth, doorHeight);
         }
+    } else {
+        for(let i in dungeon) {
+            for(let j in dungeon[i]) {
+                loadRoom(new Point(i, j));
+            }
+        }
     }
 }
 
@@ -193,44 +199,142 @@ opacityCanvas.addEventListener("click", function() {
 function decodeDungeon(str) {
     let temp = str.split(":");
     for(let i in temp) {
-        temp[i].split(",");
+        dungeon.push(temp[i].split(","));
     }
-    for(let i in temp) {
-        for(let j in temp[i]) {
-            temp[i][j] = parseInt(temp[i][j]);
+    for(let i in dungeon) {
+        for(let j in dungeon[i]) {
+            dungeon[i][j] = parseInt(dungeon[i][j]);
         }
     }
-    dungeon = temp;
+    // for(let i in dungeon) {
+    //     let str = "";
+    //     for(let j = 0;j<dungeon[i].length;j++) {
+    //         str+=dungeon[i][j] + " | ";
+    //     }
+    //     console.log(str);
+    //     str="";
+    //     for(let j = 0;j<dungeon[i].length*5-5;j++) {
+    //         str+="-"
+    //     }
+    //     console.log(str);
+    // }
 }
 
 socket.on("dungeonData", function(data) {
     decodeDungeon(data.data);
 });
 
+let roomSize = 500;
+let wallColor = "gray";
+
 function loadRoom(position) {
     let type = Math.floor(dungeon[position.x][position.y]/10);
     let rotation = dungeon[position.x][position.y]%10;
+    paint.save();
     switch(type) {
-        case 1:
-            
+        case 1: //Entrance Room
+            paint.translate(position.y*roomSize+roomSize/2+cameraX, position.x*roomSize+roomSize/2+cameraY);
+            paint.rotate((2*Math.PI)*rotation/4);
+            paint.fillStyle = wallColor;
+            paint.fillRect(-roomSize/2, -roomSize/2, roomSize/2-50, 20);
+            paint.fillRect(50, -roomSize/2, roomSize/2-50, 20);
+            paint.fillRect(-roomSize/2, -roomSize/2, 20, roomSize/2-50);
+            paint.fillRect(-roomSize/2, 50, 20, roomSize/2-50);
+            paint.fillRect(-roomSize/2, roomSize/2, roomSize, 20);
+            paint.fillRect(roomSize/2, -roomSize/2, 20, roomSize/2-50);
+            paint.fillRect(roomSize/2, 50, 20, roomSize/2-50);
             break;
-        case 2:
+        case 2: //Scrap Room 1
+            paint.translate(position.y*roomSize+roomSize/2+cameraX, position.x*roomSize+roomSize/2+cameraY);
+            paint.rotate((2*Math.PI)*rotation/4);
+            paint.fillStyle = wallColor;
+            paint.fillRect(-roomSize/2, -roomSize/2, roomSize/2-50, 20);
+            paint.fillRect(50, -roomSize/2, roomSize/2-50, 20);
+            paint.fillRect(-roomSize/2, roomSize/2, roomSize/2-50, 20);
+            paint.fillRect(50, roomSize/2, roomSize/2-50, 20);
+            paint.fillRect(-roomSize/2, -roomSize/2, 20, roomSize);
+            paint.fillRect(roomSize/2, -roomSize/2, 20, roomSize);
             break;
-        case 3:
+        case 3: //Scrap Room 2
+            paint.translate(position.y*roomSize+roomSize/2+cameraX, position.x*roomSize+roomSize/2+cameraY);
+            paint.rotate((2*Math.PI)*rotation/4);
+            paint.fillStyle = wallColor;
+            paint.fillRect(-roomSize/2, -roomSize/2, roomSize/2-50, 20);
+            paint.fillRect(50, -roomSize/2, roomSize/2-50, 20);
+            paint.fillRect(-roomSize/2, roomSize/2, roomSize, 20);
+            paint.fillRect(-roomSize/2, -roomSize/2, 20, roomSize);
+            paint.fillRect(roomSize/2, -roomSize/2, 20, roomSize);
             break;
-        case 4:
+        case 4: //Scrap Room 3
+            paint.translate(position.y*roomSize+roomSize/2+cameraX, position.x*roomSize+roomSize/2+cameraY);
+            paint.rotate((2*Math.PI)*rotation/4);
+            paint.fillStyle = wallColor;
+            paint.fillRect(-roomSize/2, -roomSize/2, roomSize/2-50, 20);
+            paint.fillRect(50, -roomSize/2, roomSize/2-50, 20);
+            paint.fillRect(-roomSize/2, -roomSize/2, 20, roomSize);
+            paint.fillRect(-roomSize/2, roomSize/2, roomSize, 20);
+            paint.fillRect(roomSize/2, -roomSize/2, 20, roomSize/2-50);
+            paint.fillRect(roomSize/2, 50, 20, roomSize/2-50);
             break;
-        case 5:
+        case 5: //Hallway
+            paint.translate(position.y*roomSize+roomSize/2+cameraX, position.x*roomSize+roomSize/2+cameraY);
+            paint.rotate((2*Math.PI)*rotation/4);
+            paint.fillStyle = wallColor;
+            paint.fillRect(-roomSize/2, -roomSize/2, roomSize/2-50, 20);
+            paint.fillRect(50, -roomSize/2, roomSize/2-50, 20);
+            paint.fillRect(-roomSize/2, roomSize/2, roomSize/2-50, 20);
+            paint.fillRect(50, roomSize/2, roomSize/2-50, 20);
+            paint.fillRect(-roomSize/2, -roomSize/2, 20, roomSize);
+            paint.fillRect(roomSize/2, -roomSize/2, 20, roomSize);
             break;
-        case 6:
+        case 6: //Bend
+            paint.translate(position.y*roomSize+roomSize/2+cameraX, position.x*roomSize+roomSize/2+cameraY);
+            paint.rotate((2*Math.PI)*rotation/4);
+            paint.fillStyle = wallColor;
+            paint.fillRect(-roomSize/2, -roomSize/2, roomSize/2-50, 20);
+            paint.fillRect(50, -roomSize/2, roomSize/2-50, 20);
+            paint.fillRect(-roomSize/2, -roomSize/2, 20, roomSize);
+            paint.fillRect(-roomSize/2, roomSize/2, roomSize, 20);
+            paint.fillRect(roomSize/2, -roomSize/2, 20, roomSize/2-50);
+            paint.fillRect(roomSize/2, 50, 20, roomSize/2-50);
             break;
         case 7:
+            paint.translate(position.y*roomSize+roomSize/2+cameraX, position.x*roomSize+roomSize/2+cameraY);
+            paint.rotate((2*Math.PI)*rotation/4);
+            paint.fillStyle = wallColor;
+            paint.fillRect(-roomSize/2, -roomSize/2, roomSize/2-50, 20);
+            paint.fillRect(50, -roomSize/2, roomSize/2-50, 20);
+            paint.fillRect(-roomSize/2, -roomSize/2, 20, roomSize/2-50);
+            paint.fillRect(-roomSize/2, 50, 20, roomSize/2-50);
+            paint.fillRect(-roomSize/2, roomSize/2, roomSize, 20);
+            paint.fillRect(roomSize/2, -roomSize/2, 20, roomSize/2-50);
+            paint.fillRect(roomSize/2, 50, 20, roomSize/2-50);
             break;
         case 8:
+            paint.translate(position.y*roomSize+roomSize/2+cameraX, position.x*roomSize+roomSize/2+cameraY);
+            paint.rotate((2*Math.PI)*rotation/4);
+            paint.fillStyle = wallColor;
+            paint.fillRect(-roomSize/2, -roomSize/2, roomSize/2-50, 20);
+            paint.fillRect(50, -roomSize/2, roomSize/2-50, 20);
+            paint.fillRect(-roomSize/2, -roomSize/2, 20, roomSize/2-50);
+            paint.fillRect(-roomSize/2, 50, 20, roomSize/2-50);
+            paint.fillRect(-roomSize/2, roomSize/2, roomSize/2-50, 20);
+            paint.fillRect(50, roomSize/2, roomSize/2-50, 20);
+            paint.fillRect(roomSize/2, -roomSize/2, 20, roomSize/2-50);
+            paint.fillRect(roomSize/2, 50, 20, roomSize/2-50);
             break;
         case 9:
+            paint.translate(position.y*roomSize+roomSize/2+cameraX, position.x*roomSize+roomSize/2+cameraY);
+            paint.rotate((2*Math.PI)*rotation/4);
+            paint.fillStyle = wallColor;
+            paint.fillRect(-roomSize/2, -roomSize/2, roomSize/2-50, 20);
+            paint.fillRect(50, -roomSize/2, roomSize/2-50, 20);
+            paint.fillRect(-roomSize/2, roomSize/2, roomSize, 20);
+            paint.fillRect(-roomSize/2, -roomSize/2, 20, roomSize);
+            paint.fillRect(roomSize/2, -roomSize/2, 20, roomSize);
             break;
     }
+    paint.restore();
 }
 
 function enterDungeon(entrance) {
