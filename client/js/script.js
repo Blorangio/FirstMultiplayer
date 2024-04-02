@@ -89,10 +89,12 @@ function clearCanvas() {
         }
     }
     //render the doors from the map
-    paint.fillStyle = "red";
-    paint.fillRect(cameraX + map.mainEntrance.x, cameraY + map.mainEntrance.y, doorWidth, doorHeight);
-    for(let i in map.fireEscapes) {
-        paint.fillRect(cameraX + map.fireEscapes[i].x, cameraY + map.fireEscapes[i].y, doorWidth, doorHeight);
+    if(players[parseInt(ID)][3]=="0") {
+        paint.fillStyle = "red";
+        paint.fillRect(cameraX + map.mainEntrance.x, cameraY + map.mainEntrance.y, doorWidth, doorHeight);
+        for(let i in map.fireEscapes) {
+            paint.fillRect(cameraX + map.fireEscapes[i].x, cameraY + map.fireEscapes[i].y, doorWidth, doorHeight);
+        }
     }
 }
 
@@ -205,8 +207,32 @@ socket.on("dungeonData", function(data) {
     decodeDungeon(data.data);
 });
 
-function enterDungeon(entrance) {
+function loadRoom(position) {
+    let type = Math.floor(dungeon[position.x][position.y]/10);
+    switch(type) {
+        case 1:
+            break;
+        case 2:
+            break;
+        case 3:
+            break;
+        case 4:
+            break;
+        case 5:
+            break;
+        case 6:
+            break;
+        case 7:
+            break;
+        case 8:
+            break;
+        case 9:
+            break;
+    }
+}
 
+function enterDungeon(entrance) {
+    socket.emit("inDungeon");
 }
 
 socket.on("playerData", function(data) {
@@ -246,17 +272,19 @@ socket.on("playerData", function(data) {
 
     paint.fillStyle = "orange";
     for(let i in players) {
-        paint.fillRect(parseInt(players[i][1])-25+cameraX, parseInt(players[i][2])-25+cameraY, 50, 50);
-        if(players[i].length>3) {
-            shadow.fillStyle = 'rgba(0,0,0,' + (1 - .1) + ')';
-            shadow.globalCompositeOperation = 'xor';
-            addLight(shadow, 1, 'rgba(0,0,0,' + (1 - .1) + ')', parseInt(players[i][1])+cameraX,  parseInt(players[i][2])+cameraY, 0, parseInt(players[i][1])+cameraX+parseFloat(players[i][3])*120,  parseInt(players[i][2])+cameraY+parseFloat(players[i][4])*120, 200);
-            shadow.globalCompositeOperation = 'source-over';
+        if(players[i][3]==players[parseInt(ID)][3]) {
+            paint.fillRect(parseInt(players[i][1])-25+cameraX, parseInt(players[i][2])-25+cameraY, 50, 50);
+            if(players[i].length>4) {
+                shadow.fillStyle = 'rgba(0,0,0,' + (1 - .1) + ')';
+                shadow.globalCompositeOperation = 'xor';
+                addLight(shadow, 1, 'rgba(0,0,0,' + (1 - .1) + ')', parseInt(players[i][1])+cameraX,  parseInt(players[i][2])+cameraY, 0, parseInt(players[i][1])+cameraX+parseFloat(players[i][4])*120,  parseInt(players[i][2])+cameraY+parseFloat(players[i][5])*120, 200);
+                shadow.globalCompositeOperation = 'source-over';
+            }
         }
     }
 
     let isClose = close();
-    if(isClose[0]) {
+    if(isClose[0]&&players[parseInt(ID)][3]=="0") {
         dropDown("Press E to Enter");
         if(collect) {
             enterDungeon(isClose[1]);

@@ -16,6 +16,11 @@ function encode(arr) {
     let str = "";
     for(let i in arr) {
         str += arr[i].id + ":" + arr[i].x + ":" + arr[i].y;
+        if(arr[i].inDungeon) {
+            str+=":1";
+        } else {
+            str+=":0";
+        }
         if(arr[i].isOn) {
             str+=":" + arr[i].fx + ":" + arr[i].fy;
         }
@@ -464,6 +469,7 @@ io.sockets.on('connection', function(socket) {
     socket.fx = 0;
     socket.fy = 0;
     socket.isOn = false;
+    socket.inDungeon = false;
     socket.SPEED = 3;
     socketList[socket.id] = socket;
 
@@ -490,6 +496,10 @@ io.sockets.on('connection', function(socket) {
 
     socket.on("click", function() {
         socket.isOn = !socket.isOn;
+    });
+
+    socket.on("inDungeon", function() {
+        socket.inDungeon = true;
     });
 
     console.log('socket connection');
@@ -540,7 +550,7 @@ function gameLoop() {
 
     for(let i in socketList) {
         for(let j in socketList) {
-            if(i!=j) {
+            if(i!=j&&socketList[i].inDungeon==socketList[j].inDungeon) {
                 let collisionUpdate = polygonCollision(genRect(socketList[i].x, socketList[i].y, 50, 50), genRect(socketList[j].x, socketList[j].y, 50, 50));
                 if(collisionUpdate.isColliding) {
                     socketList[i].x -= collisionUpdate.depth * collisionUpdate.normal.x/2;
@@ -553,16 +563,18 @@ function gameLoop() {
     }
 
     for(let i in socketList) {
-        let collisionUpdate = polygonCollision(genRect(map.mainEntrance.x+25, map.mainEntrance.y+25, 20, 100), genRect(socketList[i].x, socketList[i].y, 50, 50));
-        if(collisionUpdate.isColliding) {
-            socketList[i].x += collisionUpdate.depth * collisionUpdate.normal.x;
-            socketList[i].y += collisionUpdate.depth * collisionUpdate.normal.y;
-        }
-        for(let j in map.fireEscapes) {
-            collisionUpdate = polygonCollision(genRect(map.fireEscapes[j].x+25, map.fireEscapes[j].y+25, 20, 100), genRect(socketList[i].x, socketList[i].y, 50, 50));
+        if(!socketList[i].inDungeon) {
+            let collisionUpdate = polygonCollision(genRect(map.mainEntrance.x+25, map.mainEntrance.y+25, 20, 100), genRect(socketList[i].x, socketList[i].y, 50, 50));
             if(collisionUpdate.isColliding) {
                 socketList[i].x += collisionUpdate.depth * collisionUpdate.normal.x;
                 socketList[i].y += collisionUpdate.depth * collisionUpdate.normal.y;
+            }
+            for(let j in map.fireEscapes) {
+                collisionUpdate = polygonCollision(genRect(map.fireEscapes[j].x+25, map.fireEscapes[j].y+25, 20, 100), genRect(socketList[i].x, socketList[i].y, 50, 50));
+                if(collisionUpdate.isColliding) {
+                    socketList[i].x += collisionUpdate.depth * collisionUpdate.normal.x;
+                    socketList[i].y += collisionUpdate.depth * collisionUpdate.normal.y;
+                }
             }
         }
     }
@@ -571,7 +583,7 @@ function gameLoop() {
     for(let i in socketList) {
         socketList[i].emit("playerData", {
             msg:data
-        })
+        });
     }
 }
 
