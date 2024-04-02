@@ -52,6 +52,7 @@ let maps = [new Map(new Point(200, 200), [new Point(400, 300), new Point(300, 40
 let map = new Map(new Point(0, 0), []);
 
 function decode(str) {
+    console.log(str);
     let arr = str.split(",");
     for(let i in arr) {
         arr[i] = arr[i].split(":");
@@ -107,7 +108,6 @@ function clearCanvas() {
 function addLight(ctx, intsy, amb, xStart, yStart, rStart, xEnd, yEnd, rEnd, xOff, yOff) {
     xOff = xOff || 0;
     yOff = yOff || 0;
-
     var g = ctx.createRadialGradient(xStart, yStart, rStart, xEnd, yEnd, rEnd);
     g.addColorStop(1, 'rgba(0,0,0,' + (1 - intsy) + ')');
     g.addColorStop(0, amb);
@@ -362,7 +362,7 @@ socket.on("playerData", function(data) {
     shadow.fillRect(0, 0, 1000, 562);
     shadow.fillStyle = 'rgba(0,0,0,' + (1 - .1) + ')';
     shadow.globalCompositeOperation = 'xor';
-    addLight(shadow, 1, 'rgba(0,0,0,' + (1 - .5) + ')', parseInt(players[parseInt(ID)][1])+cameraX,  parseInt(players[parseInt(ID)][2])+cameraY, 0, parseInt(players[parseInt(ID)][1])+cameraX,  parseInt(players[parseInt(ID)][2])+cameraY, 70);
+    addLight(shadow, 1.0, 'rgba(0,0,0,' + (1.0 - .5) + ')', parseInt(players[parseInt(ID)][1])+cameraX,  parseInt(players[parseInt(ID)][2])+cameraY, 0, parseInt(players[parseInt(ID)][1])+cameraX,  parseInt(players[parseInt(ID)][2])+cameraY, 70);
     let tempMouse = new Point(mouse.x, mouse.y);
     mouse.subtract(new Point(parseInt(players[parseInt(ID)][1])+cameraX, parseInt(players[parseInt(ID)][2])+cameraY));
     mouse.normalize();
@@ -383,7 +383,7 @@ socket.on("playerData", function(data) {
             if(players[i].length>4) {
                 shadow.fillStyle = 'rgba(0,0,0,' + (1 - .1) + ')';
                 shadow.globalCompositeOperation = 'xor';
-                addLight(shadow, 1, 'rgba(0,0,0,' + (1 - .1) + ')', parseInt(players[i][1])+cameraX,  parseInt(players[i][2])+cameraY, 0, parseInt(players[i][1])+cameraX+parseFloat(players[i][4])*120,  parseInt(players[i][2])+cameraY+parseFloat(players[i][5])*120, 200);
+                addLight(shadow, 1.0, 'rgba(0,0,0,' + (1 - .1) + ')', parseInt(players[i][1])+cameraX,  parseInt(players[i][2])+cameraY, 0, parseInt(players[i][1])+cameraX+parseFloat(players[i][4])*120,  parseInt(players[i][2])+cameraY+parseFloat(players[i][5])*120, 200);
                 shadow.globalCompositeOperation = 'source-over';
             }
         }

@@ -97,8 +97,8 @@ class Shape {
             this.points[i].y -= this.getPosition().y;
             let newX = this.points[i].x * Math.cos(rad) - this.points[i].y * Math.sin(rad);
             let newY = this.points[i].y * Math.cos(rad) + this.points[i].x * Math.sin(rad);
-            this.points[i].x = newX + position.x;
-            this.points[i].y = newY + position.y;
+            this.points[i].x = newX + this.getPosition().x;
+            this.points[i].y = newY + this.getPosition().y;
         }
     }
 }
@@ -837,9 +837,11 @@ function gameLoop() {
         } else {
             for(let j in walls) {
                 let collisionUpdate = polygonCollision(walls[j], genRect(socketList[i].x, socketList[i].y, 50, 50));
+                console.log(walls[j].getPosition());
                 if(collisionUpdate.isColliding) {
-                    socketList[i].x += collisionUpdate.depth * collisionUpdate.normal.x;
-                    socketList[i].y += collisionUpdate.depth * collisionUpdate.normal.y;
+                    //console.log(collisionUpdate.depth + " | (" + collisionUpdate.normal.x + ", " + collisionUpdate.normal.y+")");
+                    socketList[i].x += collisionUpdate.depth * collisionUpdate.normal.x || 0;
+                    socketList[i].y += collisionUpdate.depth * collisionUpdate.normal.y || 0;
                 }
             }
         }
